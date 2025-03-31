@@ -49,6 +49,8 @@ export async function generateMetadata(props: {
     }
   })
 
+  // console.log("ogImages",ogImages)
+
   return {
     title: post.title,
     description: post.summary,
@@ -103,7 +105,6 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       name: author.name,
     }
   })
-
   const Layout = layouts[post.layout || defaultLayout]
 
   return (
