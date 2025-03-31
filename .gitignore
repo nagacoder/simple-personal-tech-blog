@@ -45,3 +45,6 @@ yarn-error.log*
 
 # Contentlayer
 .contentlayer
+# wrangler files
+.wrangler
+.dev.vars
