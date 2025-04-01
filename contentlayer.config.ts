@@ -59,6 +59,119 @@ const computedFields: ComputedFields = {
   toc: { type: 'json', resolve: (doc) => extractTocHeadings(doc.body.raw) },
 }
 
+
+// Define interfaces for the data structures
+interface DateInfo {
+  year: string;
+  month: string;
+}
+
+interface DateStructure {
+  [year: string]: string[];
+}
+// Define interfaces for the data structures with counts
+interface MonthCount {
+  month: string;
+  count: number;
+}
+
+interface YearCount {
+  year: string;
+  count: number;
+  months: MonthCount[];
+}
+
+interface ArchiveStructure {
+  archives: YearCount[];
+}
+
+interface BlogFile {
+  date: string; // Assuming ISO format date string like "2021-05-02T08:00:00Z"
+  draft?: boolean;
+  // Other properties your blog files might have
+}
+
+
+/**
+ * Count the occurrences of all years and months across blog posts and write to json file
+ * @param allBlogs - Array of blog file objects containing metadata
+ */
+async function createArchivesCount(allBlogs) {
+  // Create temporary structure to track counts
+  const tempStructure: {
+    [year: string]: {
+      count: number;
+      months: {
+        [month: string]: number;
+      };
+    };
+  } = {};
+  
+  // Process each blog
+  allBlogs.forEach((file) => {
+    if (file.date && (!isProduction || file.draft !== true)) {
+      // Extract year and month from the date
+      const dateObj = new Date(file.date);
+      const year = dateObj.getFullYear().toString();
+      // Month is zero-indexed in JS Date, so add 1 and pad with leading zero if needed
+      const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+      
+      // Initialize year if it doesn't exist
+      if (!tempStructure[year]) {
+        tempStructure[year] = {
+          count: 0,
+          months: {}
+        };
+      }
+      
+      // Increment year count
+      tempStructure[year].count++;
+      
+      // Initialize month if it doesn't exist
+      if (!tempStructure[year].months[month]) {
+        tempStructure[year].months[month] = 0;
+      }
+      
+      // Increment month count
+      tempStructure[year].months[month]++;
+    }
+  });
+  
+  // Convert to final structure with arrays
+  const archiveStructure: ArchiveStructure = {
+    archives: []
+  };
+  
+  // Sort years in descending order (newest first)
+  Object.keys(tempStructure)
+    .sort((a, b) => parseInt(b) - parseInt(a))
+    .forEach(year => {
+      const yearData = tempStructure[year];
+      
+      // Convert months object to array of MonthCount objects
+      const monthsArray: MonthCount[] = Object.keys(yearData.months)
+        .sort((a, b) => parseInt(b) - parseInt(a)) // Sort months descending
+        .map(month => ({
+          month,
+          count: yearData.months[month]
+        }));
+      
+      // Add year with its count and months to the final structure
+      archiveStructure.archives.push({
+        year,
+        count: yearData.count,
+        months: monthsArray
+      });
+    });
+  
+  // Format and write to file
+  const formatted = await prettier.format(JSON.stringify(archiveStructure, null, 2), { parser: 'json' });
+  writeFileSync('./app/archives-data.json', formatted);
+  
+  // Return the structure in case it's needed for other operations
+  return archiveStructure;
+}
+
 /**
  * Count the occurrences of all tags across blog posts and write to json file
  */
@@ -79,6 +192,8 @@ async function createTagCount(allBlogs) {
   const formatted = await prettier.format(JSON.stringify(tagCount, null, 2), { parser: 'json' })
   writeFileSync('./app/tag-data.json', formatted)
 }
+
+
 
 function createSearchIndex(allBlogs) {
   if (
@@ -182,6 +297,7 @@ export default makeSource({
   onSuccess: async (importData) => {
     const { allBlogs } = await importData()
     createTagCount(allBlogs)
+    createArchivesCount(allBlogs)
     createSearchIndex(allBlogs)
   },
 })

@@ -18,6 +18,7 @@ interface ListLayoutProps {
   title: string
   initialDisplayPosts?: CoreContent<Blog>[]
   pagination?: PaginationProps
+  isSearchAble:boolean
 }
 
 function Pagination({ totalPages, currentPage }: PaginationProps) {
@@ -69,6 +70,7 @@ export default function ListLayout({
   title,
   initialDisplayPosts = [],
   pagination,
+  isSearchAble = true
 }: ListLayoutProps) {
   const [searchValue, setSearchValue] = useState('')
   const filteredBlogPosts = posts.filter((post) => {
@@ -87,7 +89,7 @@ export default function ListLayout({
           <h1 className="text-3xl leading-9 font-extrabold tracking-tight text-gray-900 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14 dark:text-gray-100">
             {title}
           </h1>
-          <div className="relative max-w-lg">
+          {isSearchAble &&<div className="relative max-w-lg">
             <label>
               <span className="sr-only">Search articles</span>
               <input
@@ -112,7 +114,7 @@ export default function ListLayout({
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-          </div>
+          </div>}
         </div>
         <ul>
           {!filteredBlogPosts.length && 'No posts found.'}
