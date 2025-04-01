@@ -7,6 +7,7 @@ import { allBlogs } from 'contentlayer/generated'
 const POSTS_PER_PAGE = 5
 
 export const metadata = genPageMetadata({ title: 'Archives' })
+export const runtime = 'edge'
 
 export default async function ArchivesPages(props: {
   params: Promise<{ years: string; month: string }>

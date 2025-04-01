@@ -5,6 +5,7 @@ import ListLayout from '@/layouts/ListLayout'
 import { allBlogs } from 'contentlayer/generated'
 
 const POSTS_PER_PAGE = 5
+export const runtime = 'edge'
 
 export const metadata = genPageMetadata({ title: 'Archives' })
 
