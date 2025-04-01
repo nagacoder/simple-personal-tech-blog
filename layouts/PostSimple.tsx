@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
+import Tag from '@/components/Tag'
 import Comments from '@/components/Comments'
 import Link from '@/components/Link'
 import PageTitle from '@/components/PageTitle'
@@ -17,7 +18,7 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, next, prev, children }: LayoutProps) {
-  const { path, slug, date, title } = content
+  const { path, slug, date, title, tags } = content
 
   return (
     <SectionContainer>
@@ -25,7 +26,11 @@ export default function PostLayout({ content, next, prev, children }: LayoutProp
       <article>
         <div>
           <header>
-            <div className="space-y-1 border-b border-gray-200 pb-10 text-center dark:border-gray-700">
+            <div className="border-b border-gray-200 pb-4 dark:border-gray-700">
+              <div>
+                <PageTitle>{title}</PageTitle>
+              </div>
+
               <dl>
                 <div>
                   <dt className="sr-only">Published on</dt>
@@ -34,8 +39,8 @@ export default function PostLayout({ content, next, prev, children }: LayoutProp
                   </dd>
                 </div>
               </dl>
-              <div>
-                <PageTitle>{title}</PageTitle>
+              <div className="flex flex-wrap">
+                {tags?.map((tag) => <Tag key={tag} text={tag} />)}
               </div>
             </div>
           </header>

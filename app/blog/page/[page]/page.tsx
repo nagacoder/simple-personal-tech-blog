@@ -33,6 +33,7 @@ export default async function Page(props: { params: Promise<{ page: string }> })
 
   return (
     <ListLayout
+      isSearchAble
       posts={posts}
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
